@@ -1,0 +1,6 @@
+{
+  "python.linting.flake8Enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.enabled": true,
+  "python.pythonPath": "/home/digit/.cache/pypoetry/virtualenvs/server-QIIYG09S-py3.9/bin/python"
+}
