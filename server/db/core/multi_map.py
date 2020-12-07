@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from ..db import PhasmaConfig
 
@@ -41,7 +41,7 @@ class MultiMap(object):
         Returns:
             bool: True if the key is found, False otherwise.
         """
-        return self._multimap[key] is not None
+        return key in self._multimap
 
     def contains_value(self, key: int, value: int) -> bool:
         """Checks if the multimap has a key-value mapping
@@ -53,7 +53,10 @@ class MultiMap(object):
         Returns:
             bool: True of the value is mapped to the key, False otherwise
         """
-        return value in self._multimap[key]
+        if vals := self.get(key):
+            return value in vals
+
+        return False
 
     def add_edge(self, key: int, value: int) -> bool:
         """Adds an edge between two nodes.
@@ -76,13 +79,31 @@ class MultiMap(object):
             value (int): The value to remove from the key's list.
 
         Returns:
-            bool: True if edge could be removed, False if it does not exist
+            bool: True if edge could be removed, False if it does not exist.
         """
         try:
             self._multimap[key].remove(value)
             return True
         except ValueError as err:
-            self.logger.warn(err)
+            if self.logger is not None:
+                self.logger.warn(err)
+            return False
+
+    def remove_key(self, key: int) -> bool:
+        """Removes a key from the graph and all relationships
+
+        Args:
+            key (int): The node-id to remove.
+
+        Returns:
+            bool: True if the key could be removed, False if it does not exist.
+        """
+        try:
+            del self._multimap[key]
+            return True
+        except KeyError as err:
+            if self.logger is not None:
+                self.logger.warn(err)
             return False
 
     def clear_key(self, key: int) -> List[int]:
@@ -101,6 +122,17 @@ class MultiMap(object):
         entries_clone = deepcopy(self._multimap[key])
         self._multimap[key].clear()
         return entries_clone
+
+    def get(self, key: int) -> Union[List[int], None]:
+        """Mapped function to underlying dict's "get" operation.
+
+        Args:
+            key (int): The node-id to get the list of nodes for.
+
+        Returns:
+            Union[List[int], None]: The list of nodes, otherwise None.
+        """
+        return self._multimap.get(key)
 
     def clear(self):
         """Clears out the multimap, resetting the length to 0."""

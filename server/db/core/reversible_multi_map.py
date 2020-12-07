@@ -1,4 +1,5 @@
 import logging
+from typing import List, Union
 
 from ..db import PhasmaConfig
 from .multi_map import MultiMap
@@ -138,3 +139,51 @@ class ReversibleMultiMap:
         self._from_rel.clear()
         self._to_from.clear()
         self._to_rel.clear()
+
+    def get_nodes_by_key(self, key: int) -> Union[List[int], None]:
+        """Returns the list of nodes associated with the left-value
+        key of a node pair.
+
+        Args:
+            key (int): The node-id to get the list of nodes for.
+
+        Returns:
+            Union[List[int], None]: The list of nodes, otherwise None.
+        """
+        return self._from_to.get(key)
+
+    def get_nodes_by_value(self, key: int) -> Union[List[int], None]:
+        """Returns the list of nodes associated with the right-value
+        key of a node pair.
+
+        Args:
+            key (int): The node-id to get the list of nodes for.
+
+        Returns:
+            Union[List[int], None]: The list of nodes, otherwise None.
+        """
+        return self._to_from.get(key)
+
+    def get_weights_by_key(self, key: int) -> Union[List[int], None]:
+        """Returns all the associated weights for a given left-value key in
+        a node pair.
+
+        Args:
+            key (int): The node-id to get the list of weights for.
+
+        Returns:
+            Union[List[int], None]: The list of weights, otherwise None.
+        """
+        return self._from_rel.get(key)
+
+    def get_weights_by_value(self, key: int) -> Union[List[int], None]:
+        """Returns all the associated weights for a given right-value key in
+        a node pair.
+
+        Args:
+            key (int): The node-id to get the list of weights for.
+
+        Returns:
+            Union[List[int], None]: The list of weights, otherwise None.
+        """
+        return self._to_rel.get(key)

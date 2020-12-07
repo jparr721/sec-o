@@ -12,15 +12,15 @@ class PhasmaDB:
         """
         Args:
             logging_level (str): The logging level to use,
-                default None for no logging
+                default None for no logging.
         """
         self.logging_level = logging_level
 
-    def __call__(self):
-        """The call override makes the PhasmaDB instance callable to
-        start up the embedded database operation.
-        """
-        pass
+    def _generate_config(self) -> PhasmaConfig:
+        """Generates a config object from the class members to be passed as
+        context to the downstream dependencies of the system.
 
-    def generate_config(self) -> PhasmaConfig:
+        Returns:
+            PhasmaConfig: The new config object.
+        """
         return PhasmaConfig(logging_level=self.logging_level)
