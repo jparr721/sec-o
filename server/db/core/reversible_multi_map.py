@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import Iterator, List, Union
 
 from ..db import PhasmaConfig
 from .multi_map import MultiMap
@@ -15,9 +15,7 @@ class ReversibleMultiMap:
     references without needing to pass around node-object copies.
     """
 
-    def __init__(self, config: PhasmaConfig):
-        self.config = config
-
+    def __init__(self):
         # Connection between two nodes, K->V
         self._from_to = MultiMap(self.config)
 
@@ -29,10 +27,6 @@ class ReversibleMultiMap:
 
         # Edge for "right" node
         self._to_rel = MultiMap(self.config)
-
-        # Init logger, if configured
-        if self.config.logging_level:
-            self.logger = logging.Logger(__name__)
 
     def __len__(self):
         return len(self.from_to)
@@ -187,3 +181,35 @@ class ReversibleMultiMap:
             Union[List[int], None]: The list of weights, otherwise None.
         """
         return self._to_rel.get(key)
+
+    def get_all_weights(self) -> Union[List[int], None]:
+        """Returns all weight values for all keys.
+
+        Returns:
+            Union[List[int], None]: The list of values, None if no
+            values present.
+        """
+        return self._from_rel.values()
+
+    def get_all_weights_iter(self) -> Iterator[int]:
+        """Returns all weight values as an iterator.
+
+        Yields:
+            Iterator[int]: The list of weight node-ids.
+        """
+        yield self._from_rel.values()
+
+    def get_from_size(self, from_: int) -> int:
+        """Returns the number of relations that a left-node has.
+
+        Args:
+            from_ (int): The left-node id.
+
+        Returns:
+            int: The size of the list of node-ids.
+        """
+        try:
+            return len(self._from_to.get(from_))
+        except TypeError as err:
+            self.logger.error(err)
+            return 0

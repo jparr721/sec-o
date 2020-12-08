@@ -1,9 +1,6 @@
-import logging
 from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, List, Union
-
-from ..db import PhasmaConfig
 
 
 class MultiMap(object):
@@ -12,14 +9,9 @@ class MultiMap(object):
     It allows a single entry to correspond to multiple values.
     """
 
-    def __init__(self, config: PhasmaConfig) -> "MultiMap":
+    def __init__(self) -> "MultiMap":
         # Defaultdict with list lets us map multiple values to one key.
         self._multimap: Dict[int, List[int]] = defaultdict(list)
-
-        self.config = config
-
-        if self.config.logging_level:
-            self.logger = logging.Logger(__name__)
 
     def __len__(self) -> int:
         return len(self._multimap)
@@ -84,9 +76,7 @@ class MultiMap(object):
         try:
             self._multimap[key].remove(value)
             return True
-        except ValueError as err:
-            if self.logger is not None:
-                self.logger.warn(err)
+        except ValueError:
             return False
 
     def remove_key(self, key: int) -> bool:
@@ -101,9 +91,7 @@ class MultiMap(object):
         try:
             del self._multimap[key]
             return True
-        except KeyError as err:
-            if self.logger is not None:
-                self.logger.warn(err)
+        except KeyError:
             return False
 
     def clear_key(self, key: int) -> List[int]:
@@ -133,6 +121,15 @@ class MultiMap(object):
             Union[List[int], None]: The list of nodes, otherwise None.
         """
         return self._multimap.get(key)
+
+    def values(self) -> Union[List[int], None]:
+        """Returns all values for all keys.
+
+        Returns:
+            Union[List[int], None]: The list of values, None if no
+            values present.
+        """
+        return self._multimap.values()
 
     def clear(self):
         """Clears out the multimap, resetting the length to 0."""

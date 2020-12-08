@@ -1,33 +1,28 @@
 from db.core.multi_map import MultiMap
-from db.db import PhasmaConfig
-
-cfg = PhasmaConfig(logging_level="info")
 
 
 def test_creates_with_config():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
 
     assert mm is not None
-    assert mm.logger is not None
-    assert mm.config == cfg
 
 
 def test_map_length():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
 
     assert len(mm) == 0
     assert mm.empty() is True
 
 
 def test_map_length_nonzero():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert len(mm) == 1
 
 
 def test_map_contains_key():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert mm.contains_key(1) is True
@@ -35,7 +30,7 @@ def test_map_contains_key():
 
 
 def test_map_contains_value():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert mm.contains_value(1, 2) is True
@@ -43,13 +38,13 @@ def test_map_contains_value():
 
 
 def test_map_contains_value_if_value_None():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
 
     assert mm.contains_value(1, 1) is False
 
 
 def test_map_removes_key():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert mm.contains_key(1) is True
@@ -62,7 +57,7 @@ def test_map_removes_key():
 
 
 def test_map_removes_value():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert mm.contains_key(1) is True
@@ -75,7 +70,7 @@ def test_map_removes_value():
 
 
 def test_map_clears_key():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert mm.contains_key(1) is True
@@ -88,7 +83,7 @@ def test_map_clears_key():
 
 
 def test_map_safe_get():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
 
     assert mm.get(1) == [2]
@@ -96,7 +91,7 @@ def test_map_safe_get():
 
 
 def test_map_clear():
-    mm = MultiMap(cfg)
+    mm = MultiMap()
     mm.add_edge(1, 2)
     mm.add_edge(1, 3)
     mm.add_edge(2, 4)
