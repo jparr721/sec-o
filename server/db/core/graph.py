@@ -1,8 +1,6 @@
 from collections import defaultdict
-from typing import Dict, Set, Union
+from typing import Dict, Set, Union, List
 from uuid import uuid4
-
-from pyroaring import BitMap
 
 from .reversible_multi_map import ReversibleMultiMap
 
@@ -13,7 +11,7 @@ class Graph:
     features a bi-directional multimap under the hood to make left-hand
     lookups and right-hand lookups very efficient.
 
-    It maintains reference structures to underlying node data to allow for
+    It mastrains reference structures to underlying node data to allow for
     the bi-directional multimap to focus on edges, fetching underlying
     data only when absolutely necessary.
     """
@@ -23,13 +21,15 @@ class Graph:
         self.edge_counts: Dict[str, int] = defaultdict(int)
 
         # Keys for all edges
-        self._edge_keys: Dict[int, int] = defaultdict(int)
+        self._edge_keys: Dict[str, Dict[str, str]] = defaultdict(
+            lambda: defaultdict(str)
+        )
 
         # All edges
         self._edges: Dict[str, object] = {}
 
         # All keys for all nodes
-        self._node_keys: Dict[str, Dict[str, int]] = defaultdict(
+        self._node_keys: Dict[str, Dict[str, str]] = defaultdict(
             lambda: defaultdict(lambda: -1)
         )
 
@@ -42,15 +42,15 @@ class Graph:
         )
 
         # Related counts
-        self._related_counts: Dict[str, Dict[int, int]] = defaultdict(
-            lambda: defaultdict(int)
+        self._related_counts: Dict[str, Dict[str, str]] = defaultdict(
+            lambda: defaultdict(str)
         )
 
         # Nodes that are no longer eith us
-        self._deleted_nodes = BitMap()
+        self._deleted_nodes: List[str] = []
 
         # Edges that are no longer with us
-        self._deleted_edges = BitMap()
+        self._deleted_edges: List[str] = []
 
     def clear(self):
         """Clears all underlying types, setting their length to 0."""
@@ -72,21 +72,21 @@ class Graph:
         """
         return set(self._related.keys())
 
-    def get_edge_type_count(self, type: str) -> Union[int, None]:
+    def get_edge_type_count(self, type: str) -> Union[str, None]:
         """Gets the number of edges related to a given type.
 
         Args:
             type (str): The edge type to look up.
 
         Returns:
-            Union[int, None]: The number of edges associated with the
+            Union[str, None]: The number of edges associated with the
             type, or None if there are no edges found.
         """
         return self.edge_counts.get(type)
 
     def add_node(
         self, label: str, key: str, properties: Dict[str, object] = {}
-    ) -> int:
+    ) -> str:
         """Adds a new node to the graph with a given label and key type.
 
         Args:
@@ -94,7 +94,7 @@ class Graph:
             key (str): The key to associate with this node.
 
         Returns:
-            int: The new node's ID.
+            str: The new node's ID.
         """
         if key in self._node_keys:
             return -1
@@ -103,7 +103,7 @@ class Graph:
             properties["~key"] = key
 
             if not self._deleted_nodes:
-                node_id = len(self._nodes)
+                node_id = uuid4()
                 properties["~id"] = node_id
                 self._nodes[node_id] = properties
                 self._node_keys[key] = node_id
@@ -127,11 +127,11 @@ class Graph:
             bool: [description]
         """
 
-    def get_node_by_id(self, id: int) -> Dict[str, object]:
+    def get_node_by_id(self, id: str) -> Dict[str, object]:
         """Gets a node's underlying representation by the node-id.
 
         Args:
-            id (int): The node id.
+            id (str): The node id.
 
         Returns:
             Dict[str, object]: The node value.
@@ -157,7 +157,7 @@ class Graph:
 
         return self._nodes.get(node_id)
 
-    def get_node_id_by_label_and_key(self, label: str, key: str) -> int:
+    def get_node_id_by_label_and_key(self, label: str, key: str) -> str:
         """Returns a node's underlying id value by label and key.
 
         Args:
@@ -165,7 +165,7 @@ class Graph:
             key (str): The node key.
 
         Returns:
-            int: The node id value, or None if no id present.
+            str: The node id value, or None if no id present.
         """
         return self._get_node_key_id(label, key)
 
@@ -204,18 +204,18 @@ class Graph:
         node_id = self._get_node_key_id(label, key)
         return self.update_node_properties_by_id(node_id)
 
-    def _get_node_by_key(self, key: str) -> Dict[str, int]:
+    def _get_node_by_key(self, key: str) -> Dict[str, str]:
         """Gets a node by a given key.
 
         Args:
             key (str): The key to look up.
 
         Returns:
-            Dict[str, int]: The dict associated with the key.
+            Dict[str, str]: The dict associated with the key.
         """
         return self._node_keys.get(key)
 
-    def _get_node_key_id(self, label: str, id: str) -> int:
+    def _get_node_key_id(self, label: str, id: str) -> str:
         """Gets a node by label and id string.
 
         Args:
@@ -223,7 +223,7 @@ class Graph:
             id (str): The node id.
 
         Returns:
-            int: The node key ID.
+            str: The node key ID.
         """
         return self._node_keys.get(label).get(id)
 
@@ -240,10 +240,10 @@ class Graph:
     def _add_edge_key_id(
         self,
         edge_type: str,
-        count: int,
-        left_node: int,
-        right_node: int,
-        id: int,
+        count: str,
+        left_node: str,
+        right_node: str,
+        id: str,
     ):
         """Adds a edge between a left and right-hand node.
         The edge is an already-known type. Relation represents an edge
@@ -251,31 +251,55 @@ class Graph:
 
         Args:
             edge_type (str): The type of edge being created.
-            count (int): The number of edges being made.
-            left_node (int): The left-hand node of the pair.
-            right_node (int): The right-hand node of the pair.
-            id (int): The ID associating this edge value in the global map.
+            count (str): The number of edges that exist.
+            left_node (str): The left-hand node of the pair.
+            right_node (str): The right-hand node of the pair.
+            id (str): The ID associating this edge value in the global map.
         """
-        k = type + str(count)
-        if k in self._edge_keys:
-            self._edge_keys[k] = {(left_node << 32) + right_node: id}
-        else:
-            edge_key = (left_node >> 32) + right_node
-            self._edge_keys[k] = {edge_key: id}
+        edge_key = self._derive_edge_key(edge_type, count)
+        self._edge_keys[edge_key] = {
+            self._derive_edge_subkey(left_node, right_node): id
+        }
 
     def _get_edge_key_id(
-        self, edge_type: str, count: int, left_node: int, right_node: int
-    ) -> int:
+        self, edge_type: str, count: str, left_node: str, right_node: str
+    ) -> str:
         """Retrieve a edge by key id.
 
         Args:
             edge_type (str): The type of edge being looked for.
-            count (int): The count of the edge type.
-            left_node (int): The left node of the pair.
-            right_node (int): The right node of the pair.
+            count (str): The count of the edge type.
+            left_node (str): The left node of the pair.
+            right_node (str): The right node of the pair.
 
         Returns:
-            int: The edge key id.
+            str: The edge key id.
         """
-        k = edge_type + str(count)
-        return self._edge_keys[k].get((left_node << 32) + right_node)
+        edge_key = self._derive_edge_key(edge_type, count)
+        return self._edge_keys[edge_key].get(
+            self._derive_edge_subkey(left_node, right_node)
+        )
+
+    def _derive_edge_key(self, edge_type: str, count: int) -> str:
+        """Creates the edge key from the type and count.
+
+        Args:
+            edge_type (str): The type of edge.
+            count (int): The count of the edge.
+
+        Returns:
+            str: The edge key
+        """
+        return f"{edge_type}:{count}"
+
+    def _derive_edge_subkey(self, left_node: str, right_node: str) -> str:
+        """Derives an edge subkey.
+
+        Args:
+            left_node (str): The left node key.
+            right_node (str): The right node key.
+
+        Returns:
+            str: The subkey value.
+        """
+        return f"{left_node}:{right_node}"

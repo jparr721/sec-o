@@ -261,14 +261,6 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
-name = "pyroaring"
-version = "0.2.9"
-description = "Fast and lightweight set for unsigned 32 bits integers."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "pytest"
 version = "5.4.3"
 description = "pytest: simple powerful testing with Python"
@@ -359,7 +351,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e2112770d6e4b0e61f40ea57add19ce97711917c80fb1311803327f8ba72aa69"
+content-hash = "e9f35c04ff7c5908555f977523d430e68435e9e08a1fb00971041e7f66532d2d"
 
 [metadata.files]
 appdirs = [
@@ -510,9 +502,6 @@ pynvim = [
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
     {file = "pyparsing-2.4.7.tar.gz", hash = "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1"},
-]
-pyroaring = [
-    {file = "pyroaring-0.2.9.tar.gz", hash = "sha256:bd2305ae0e51476745d3144627971b40de586e798b6c4a69bf2fc556d6fc9dff"},
 ]
 pytest = [
     {file = "pytest-5.4.3-py3-none-any.whl", hash = "sha256:5c0db86b698e8f170ba4582a492248919255fcd4c79b1ee64ace34301fb589a1"},

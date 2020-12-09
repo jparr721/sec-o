@@ -11,9 +11,9 @@ class MultiMap(object):
 
     def __init__(self) -> "MultiMap":
         # Defaultdict with list lets us map multiple values to one key.
-        self._multimap: Dict[int, List[int]] = defaultdict(list)
+        self._multimap: Dict[str, List[str]] = defaultdict(list)
 
-    def __len__(self) -> int:
+    def __len__(self) -> str:
         return len(self._multimap)
 
     def empty(self) -> bool:
@@ -24,23 +24,23 @@ class MultiMap(object):
         """
         return len(self) == 0
 
-    def contains_key(self, key: int) -> bool:
+    def contains_key(self, key: str) -> bool:
         """Checks if the multimap has a key.
 
         Args:
-            key (int): The integer-based node-id value
+            key (str): The streger-based node-id value
 
         Returns:
             bool: True if the key is found, False otherwise.
         """
         return key in self._multimap
 
-    def contains_value(self, key: int, value: int) -> bool:
+    def contains_value(self, key: str, value: str) -> bool:
         """Checks if the multimap has a key-value mapping
 
         Args:
-            key (int): The node-id of the key we are checking
-            value (int): The node-id of the value we are checking
+            key (str): The node-id of the key we are checking
+            value (str): The node-id of the value we are checking
 
         Returns:
             bool: True of the value is mapped to the key, False otherwise
@@ -50,12 +50,12 @@ class MultiMap(object):
 
         return False
 
-    def add_edge(self, key: int, value: int) -> bool:
+    def add_edge(self, key: str, value: str) -> bool:
         """Adds an edge between two nodes.
 
         Args:
-            key (int): The key to insert.
-            value (int): The value to add to the key's list of values.
+            key (str): The key to insert.
+            value (str): The value to add to the key's list of values.
 
         Returns:
             bool: True if the value was added successfully, False otherwise.
@@ -63,12 +63,12 @@ class MultiMap(object):
         self._multimap[key].append(value)
         return True
 
-    def remove_edge(self, key: int, value: int) -> bool:
+    def remove_edge(self, key: str, value: str) -> bool:
         """Removes a relationship between a supplied key and value.
 
         Args:
-            key (int): The key to remove the relationship.
-            value (int): The value to remove from the key's list.
+            key (str): The key to remove the relationship.
+            value (str): The value to remove from the key's list.
 
         Returns:
             bool: True if edge could be removed, False if it does not exist.
@@ -79,11 +79,11 @@ class MultiMap(object):
         except ValueError:
             return False
 
-    def remove_key(self, key: int) -> bool:
+    def remove_key(self, key: str) -> bool:
         """Removes a key from the graph and all relationships
 
         Args:
-            key (int): The node-id to remove.
+            key (str): The node-id to remove.
 
         Returns:
             bool: True if the key could be removed, False if it does not exist.
@@ -94,14 +94,14 @@ class MultiMap(object):
         except KeyError:
             return False
 
-    def clear_key(self, key: int) -> List[int]:
+    def clear_key(self, key: str) -> List[str]:
         """Deletes all values associated with a given key.
 
         Args:
-            key (int): The node to clear.
+            key (str): The node to clear.
 
         Returns:
-            List[int]: Returns empty list if no entries,
+            List[str]: Returns empty list if no entries,
             the entries otherwise.
         """
         if len(self._multimap[key]) == 0:
@@ -111,22 +111,22 @@ class MultiMap(object):
         self._multimap[key].clear()
         return entries_clone
 
-    def get(self, key: int) -> Union[List[int], None]:
+    def get(self, key: str) -> Union[List[str], None]:
         """Mapped function to underlying dict's "get" operation.
 
         Args:
-            key (int): The node-id to get the list of nodes for.
+            key (str): The node-id to get the list of nodes for.
 
         Returns:
-            Union[List[int], None]: The list of nodes, otherwise None.
+            Union[List[str], None]: The list of nodes, otherwise None.
         """
         return self._multimap.get(key)
 
-    def values(self) -> Union[List[int], None]:
+    def values(self) -> Union[List[str], None]:
         """Returns all values for all keys.
 
         Returns:
-            Union[List[int], None]: The list of values, None if no
+            Union[List[str], None]: The list of values, None if no
             values present.
         """
         return self._multimap.values()
